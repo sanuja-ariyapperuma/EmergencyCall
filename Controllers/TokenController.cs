@@ -65,7 +65,10 @@ namespace Ambulance.Controllers
         }
         private async Task<UserInfo> GetUser(string email, string password)
         {
-            return await _context.UserInfos.Include(x=> x.UserRole).FirstOrDefaultAsync(u => u.Email == email && u.Password == password && u.Is_active);
+            var user = await _context.UserInfos.Include(x => x.UserRole).FirstOrDefaultAsync(u => u.Email == email && u.Is_active);
+
+            return (user != null && BCrypt.Net.BCrypt.Verify(password, user.Password)) ? user : null;
+            
         }
     }
 }
