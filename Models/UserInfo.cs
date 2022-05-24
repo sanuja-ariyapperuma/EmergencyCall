@@ -15,5 +15,8 @@ namespace Ambulance.Models
         public int User_role { get; set; }
         [ForeignKey(nameof(User_role))]
         public virtual UserRole? UserRole { get; set; }
+        public List<IncidentDetail> Ambulances { get; set; }
+        public List<IncidentDetail> Doctors { get; set; }
+        public List<IncidentDetail> DischargedDoctors { get; set; }
     }
 }

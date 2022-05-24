@@ -10,6 +10,7 @@ using System.Text;
 
 namespace Ambulance.Controllers
 {
+    
     [Route("api/[controller]")]
     [ApiController]
     public class TokenController : ControllerBase
