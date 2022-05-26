@@ -34,6 +34,8 @@ namespace Ambulance.Models
         public int? DischargedDoctorId { get; set; }
         [ForeignKey(nameof(DischargedDoctorId))]
         public virtual UserInfo? DischargedDoctor { get; set; }
+        [InverseProperty("IncidentDetail")]
+        public List<Treatment> Treatments { get; set; }
 
     }
 }

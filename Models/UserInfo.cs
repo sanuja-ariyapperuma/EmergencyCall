@@ -18,5 +18,7 @@ namespace Ambulance.Models
         public List<IncidentDetail> Ambulances { get; set; }
         public List<IncidentDetail> Doctors { get; set; }
         public List<IncidentDetail> DischargedDoctors { get; set; }
+        [InverseProperty("UserInfo")]
+        public List<Treatment> Treatments { get; set; }
     }
 }

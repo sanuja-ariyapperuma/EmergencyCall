@@ -55,7 +55,6 @@ else
     app.UseHttpsRedirection();
 }
 
-
 app.UseCors(options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
 app.UseAuthentication();

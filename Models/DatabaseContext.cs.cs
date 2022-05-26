@@ -18,6 +18,7 @@ namespace Ambulance.Models
         public virtual DbSet<UserRole>? UserRoles { get; set; }
         public virtual DbSet<Hospital>? Hospitals { get; set; }
         public virtual DbSet<IncidentDetail>? IncidentDetails { get; set; }
+        public virtual DbSet<Treatment>? Treatments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -34,6 +35,7 @@ namespace Ambulance.Models
                 entity.HasMany(p => p.Ambulances).WithOne(b => b.Ambulance);
                 entity.HasMany(p => p.DischargedDoctors).WithOne(b => b.DischargedDoctor);
                 entity.HasMany(p => p.Doctors).WithOne(b => b.Doctor);
+                entity.HasMany(p => p.Treatments).WithOne(b => b.UserInfo);
             });
 
             modelBuilder.Entity<UserRole>(entity =>
@@ -68,6 +70,8 @@ namespace Ambulance.Models
                 entity.HasOne(p => p.Ambulance).WithMany(b => b.Ambulances);
                 entity.HasOne(p => p.Doctor).WithMany(b => b.Doctors);
                 entity.HasOne(p => p.DischargedDoctor).WithMany(b => b.DischargedDoctors);
+                entity.HasMany(p => p.Treatments).WithOne(b => b.IncidentDetail);
+                
             });
 
             modelBuilder.Entity<Hospital>(entity =>
@@ -75,6 +79,18 @@ namespace Ambulance.Models
                 entity.ToTable("hospital");
                 entity.Property(e => e.Id).HasColumnName("id");
                 entity.Property(e => e.Name).HasColumnName("name");
+            });
+
+            modelBuilder.Entity<Treatment>(entity =>
+            {
+                entity.ToTable("treatment");
+                entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.Description).HasColumnName("description");
+                entity.Property(e => e.IncidentId).HasColumnName("incident_id");
+                entity.Property(e => e.DoctorId).HasColumnName("doctor_id");
+                entity.Property(e => e.TreatmentTime).HasColumnName("treated_time");
+                entity.HasOne(p => p.IncidentDetail).WithMany(b => b.Treatments);
+                entity.HasOne(p => p.UserInfo).WithMany(b => b.Treatments);
 
             });
 

@@ -1,7 +1,9 @@
 ﻿using Ambulance.Models;
+using Ambulance.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Ambulance.Controllers
 {
@@ -31,8 +33,8 @@ namespace Ambulance.Controllers
                 incidentData.DischargedDoctorId = null;
                 incidentData.AmbulanceId = Convert.ToInt16(ExtractClaims().UserId.ToString());
 
-                var result = await _context.IncidentDetails.AddAsync(incidentData);
-                var saveStatus = await _context.SaveChangesAsync();
+                await _context.IncidentDetails.AddAsync(incidentData);
+                await _context.SaveChangesAsync();
 
                 return Ok(incidentData.Id);
                 
@@ -59,7 +61,7 @@ namespace Ambulance.Controllers
                         data = _context.IncidentDetails.Where(e => e.AmbulanceId == Convert.ToInt32(claims.UserId)).OrderByDescending(c => c.PickupTime).Take(10).ToList();
                         break;
                     case "Doctor":
-                        data = _context.IncidentDetails.OrderByDescending(c => c.PickupTime).Take(10).ToList();
+                        data = _context.IncidentDetails.Where(e => e.PatientStatus != 0).OrderByDescending(c => c.PickupTime).Take(10).ToList();
                         break;
                 }
 
@@ -93,6 +95,56 @@ namespace Ambulance.Controllers
             else 
             {
                 return BadRequest("No incidents found");
+            }
+
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Doctor")]
+        public async Task<IActionResult> Treatment([FromBody] VM_Treatment treatment)
+        {
+            var _treatment = new Treatment();
+
+            if (!(_context.IncidentDetails.Any(o => o.Id == treatment.IncidentId.Trim()))) return BadRequest("Invalid IncidentId");
+           
+            _treatment.Description = treatment.Description.Trim();
+            _treatment.IncidentId = treatment.IncidentId.Trim();
+            _treatment.DoctorId = Convert.ToInt32(ExtractClaims().UserId.ToString());
+            _treatment.TreatmentTime = DateTime.Now;
+
+            await _context.Treatments.AddAsync(_treatment);
+            await _context.SaveChangesAsync();
+
+            return Ok("Treatement added");
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Doctor")]
+        public async Task<IActionResult> ListTreatments(string incidentId) 
+        {
+            var db_treatments = _context.Treatments.Where(e => e.IncidentId == incidentId).Include(b => b.UserInfo).OrderByDescending(e => e.TreatmentTime).ToList();
+
+            if (db_treatments != null) 
+            {
+                var treatment_list = new List<VM_Treatment>();
+
+                foreach (var treatment in db_treatments)
+                {
+                    var treatment_1 = new VM_Treatment();
+
+                    treatment_1.Description = treatment.Description;
+                    treatment_1.TreatmentTime = treatment.TreatmentTime;
+                    treatment_1.IncidentId = treatment.IncidentId;
+                    treatment_1.Doctor = treatment.UserInfo.Name;
+
+                    treatment_list.Add(treatment_1);
+
+                }
+                return Ok(treatment_list);
+            }
+            else 
+            {
+                return BadRequest("Invalid incidentId");
             }
 
         }
