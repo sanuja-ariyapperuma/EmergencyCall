@@ -1,5 +1,6 @@
 ﻿using Ambulance.Models;
 using Ambulance.Models.ViewModels;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,10 +11,10 @@ using System.Text;
 
 namespace Ambulance.Controllers
 {
-    
+
     [Route("api/[controller]")]
     [ApiController]
-    public class TokenController : ControllerBase
+    public class TokenController : BaseControllerClass
     {
         public IConfiguration _configuration;
         private readonly DatabaseContext _context;
@@ -23,6 +24,7 @@ namespace Ambulance.Controllers
             _configuration = config;
             _context = context;
         }
+
         [HttpPost]
         public async Task<IActionResult> Login(VM_UserRole _userData) 
         {
@@ -39,7 +41,8 @@ namespace Ambulance.Controllers
                         new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
                         new Claim("UserId", user.Id.ToString()),
                         new Claim("Name", user.Name.ToString()),
-                        new Claim("UserRole", user.UserRole.Name.ToString())
+                        new Claim("UserRole", user.UserRole.Name.ToString()),
+                        new Claim(ClaimTypes.Role, user.UserRole.Name.ToString())
                     };
 
                     var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
@@ -49,7 +52,7 @@ namespace Ambulance.Controllers
                         _configuration["Jwt:Issuer"],
                         _configuration["Jwt:Audience"],
                         claims,
-                        expires: DateTime.UtcNow.AddMinutes(10),
+                        expires: DateTime.UtcNow.AddDays(1),
                         signingCredentials: signIn);
 
                     return Ok(new JwtSecurityTokenHandler().WriteToken(token));
@@ -71,5 +74,7 @@ namespace Ambulance.Controllers
             return (user != null && BCrypt.Net.BCrypt.Verify(password, user.Password)) ? user : null;
             
         }
+
+        
     }
 }

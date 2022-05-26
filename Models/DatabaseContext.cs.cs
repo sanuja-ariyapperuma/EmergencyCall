@@ -70,6 +70,14 @@ namespace Ambulance.Models
                 entity.HasOne(p => p.DischargedDoctor).WithMany(b => b.DischargedDoctors);
             });
 
+            modelBuilder.Entity<Hospital>(entity =>
+            {
+                entity.ToTable("hospital");
+                entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.Name).HasColumnName("name");
+
+            });
+
             OnModelCreatingPartial(modelBuilder);
         }
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);

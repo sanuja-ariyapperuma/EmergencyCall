@@ -28,7 +28,7 @@ namespace Ambulance.Models
         public int AmbulanceId { get; set; }
         [ForeignKey(nameof(AmbulanceId))]
         public virtual UserInfo? Ambulance { get; set; }
-        public int DoctorId { get; set; }
+        public int? DoctorId { get; set; }
         [ForeignKey(nameof(DoctorId))]
         public virtual UserInfo? Doctor { get; set; }
         public int? DischargedDoctorId { get; set; }
