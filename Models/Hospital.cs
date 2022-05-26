@@ -4,9 +4,9 @@ namespace Ambulance.Models
 {
     public class Hospital
     {
-        public int Id { get; set; }
+        public int? Id { get; set; }
         public string Name { get; set; }
         [InverseProperty("Hospital")]
-        public List<IncidentDetail> Incidents { get; set; }
+        public List<IncidentDetail>? Incidents { get; set; }
     }
 }

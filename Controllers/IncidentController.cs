@@ -21,7 +21,6 @@ namespace Ambulance.Controllers
             _context = context;
         }
 
-
         [HttpPost]
         [Authorize(Roles = "Ambulance")]
         public async Task<IActionResult> Create([FromBody] IncidentDetail incidentData)
@@ -58,13 +57,12 @@ namespace Ambulance.Controllers
                 switch (claims.Userrole)
                 {
                     case "Ambulance":
-                        data = _context.IncidentDetails.Where(e => e.AmbulanceId == Convert.ToInt32(claims.UserId)).OrderByDescending(c => c.PickupTime).Take(10).ToList();
+                        data = _context.IncidentDetails.Include(p => p.Hospital).Where(e => e.AmbulanceId == Convert.ToInt32(claims.UserId)).OrderByDescending(c => c.PickupTime).Take(10).ToList();
                         break;
                     case "Doctor":
-                        data = _context.IncidentDetails.Where(e => e.PatientStatus != 0).OrderByDescending(c => c.PickupTime).Take(10).ToList();
+                        data = _context.IncidentDetails.Include(p => p.Hospital).Where(e => e.PatientStatus != 0).OrderByDescending(c => c.PickupTime).Take(10).ToList();
                         break;
                 }
-
 
                 return (data != null) ? Ok(data) : BadRequest("No records found");
 
@@ -116,6 +114,28 @@ namespace Ambulance.Controllers
             await _context.SaveChangesAsync();
 
             return Ok("Treatement added");
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Doctor")]
+        public async Task<IActionResult> Discharge(string incidentId) 
+        {
+            try
+            {
+                var incident = _context.IncidentDetails.Where(o => o.Id == incidentId).FirstOrDefaultAsync().Result;
+
+                if (incident == null) return BadRequest("No incident found");
+
+                incident.PatientStatus = 2;
+
+                await _context.SaveChangesAsync();
+
+                return Ok("Patient discharged");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet]
