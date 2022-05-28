@@ -45,7 +45,6 @@ namespace Ambulance.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Ambulance,Doctor")]
         public async Task<IActionResult> List() 
         {
             var claims = ExtractClaims();
@@ -56,11 +55,14 @@ namespace Ambulance.Controllers
 
                 switch (claims.Userrole)
                 {
+                    case "Admin":
+                        data = _context.IncidentDetails.Include(p => p.Hospital).Where(e => e.PatientStatus == 0).OrderByDescending(c => c.PickupTime).ToList();
+                        break;
                     case "Ambulance":
                         data = _context.IncidentDetails.Include(p => p.Hospital).Where(e => e.AmbulanceId == Convert.ToInt32(claims.UserId)).OrderByDescending(c => c.PickupTime).Take(10).ToList();
                         break;
                     case "Doctor":
-                        data = _context.IncidentDetails.Include(p => p.Hospital).Where(e => e.PatientStatus != 0).OrderByDescending(c => c.PickupTime).Take(10).ToList();
+                        data = _context.IncidentDetails.Include(p => p.Hospital).Where(e => e.PatientStatus != 0).OrderByDescending(c => c.PickupTime).ToList();
                         break;
                 }
 

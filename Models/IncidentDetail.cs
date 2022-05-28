@@ -22,7 +22,7 @@ namespace Ambulance.Models
         public string GardianName { get; set; }
         [StringLength(10, ErrorMessage = "Gardian contact number should be 10 digits")]
         public string GardianContact { get; set; }
-        public int HospitalId { get; set; }
+        public int? HospitalId { get; set; }
         [ForeignKey(nameof(HospitalId))]
         public virtual Hospital? Hospital { get; set; }
         public int AmbulanceId { get; set; }
